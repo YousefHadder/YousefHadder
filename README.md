@@ -19,7 +19,3 @@ I'm **Yousef** (You can call me Joey), a *Software Engineer II* [@Github](https:
 
 [![My Skills](https://skillicons.dev/icons?i=html,css,js,ts,java,cpp,nodejs,express,ruby,go,aws)](https://skillicons.dev)
 
-
-### GitHub Stats
-
-![Your GitHub Stats](https://github-readme-stats.vercel.app/api?username=yousefhadder&show_icons=true&theme=radical)
