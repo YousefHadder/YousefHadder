@@ -17,5 +17,5 @@ I'm **Yousef** (You can call me Joey), a *Software Engineer II* [@Github](https:
 
 ### Languages and Tools
 
-[![My Skills](https://skillicons.dev/icons?i=html,css,js,ts,java,cpp,nodejs,express,ruby,go,aws)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=html,css,js,ts,java,cpp,nodejs,express,ruby,go,aws,neovim)](https://skillicons.dev)
 
