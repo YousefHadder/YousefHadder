@@ -11,8 +11,7 @@ I'm **Yousef**, a *Software Engineer II* [@Github](https://www.github.com).
 
 <img src="img/octocat.png" alt="Octocat" width="400"/>
 
-![Visitor Count](https://profile-counter.glitch.me/yousefhadder/count.svg)
-
+![](https://komarev.com/ghpvc/?username=yousefhadder)
 ### Connect with Me
 
 [![](https://skillicons.dev/icons?i=linkedin)](https://www.linkedin.com/in/yousefhadder)
