@@ -1,6 +1,4 @@
-## Salam 👋
-
-I'm **Yousef**, a *Software Engineer II* [@Github](https://www.github.com).
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=500&color=000000&center=true&vCenter=true&width=435&lines=Salam+%F0%9F%91%8B;I'm+Yousef.;A+software+Engineer+%40Github)](https://git.io/typing-svg)
 
 ### About Me
 
