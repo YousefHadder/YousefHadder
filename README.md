@@ -5,6 +5,7 @@
 - 🔭 I’m currently part of the Observability Expreience team
 - 🌱 I’m currently learning Go, Ruby, DataDog, and Splunk.
 - 👯 I’m looking to collaborate on all kinds of open source projects
+-  I use neovim BTW!
 - ⚡ Fun fact: I'm way older than what I look 🙈
 
 <img src="img/octocat.png" alt="Octocat" width="400"/>
