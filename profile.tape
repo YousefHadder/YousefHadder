@@ -50,7 +50,7 @@ Type "-"
 Sleep 800ms
 
 # -----------------------------------------------------------------------------
-# Scene 3: Show GitHub contributions graph in top-right pane (instant typing)
+# Scene 3: Show activity stats in top-right pane
 # -----------------------------------------------------------------------------
 
 # Move to top-right pane
@@ -60,13 +60,13 @@ Up
 Sleep 300ms
 
 Hide
-Type "clear && gh-contributions YousefHadder -l && sleep 9999"
+Type "clear && termgraph data/activity.dat --title 'YTD Activity' --color green --width 20 --format '{:.0f}' && sleep 9999"
 Show
 Enter
 Sleep 1500ms
 
 # -----------------------------------------------------------------------------
-# Scene 4: Show GitHub contributions count in bottom-right pane (instant typing)
+# Scene 4: Show language stats in bottom-right pane
 # -----------------------------------------------------------------------------
 
 # Move to bottom-right pane
@@ -76,7 +76,7 @@ Down
 Sleep 300ms
 
 Hide
-Type "clear && gh-contributions YousefHadder -c && sleep 9999"
+Type "clear && termgraph data/languages.dat --title 'Top Languages' --color cyan --width 20 --format '{:.0f}' && sleep 9999"
 Show
 Enter
 Sleep 1500ms

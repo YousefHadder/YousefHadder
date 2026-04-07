@@ -50,15 +50,18 @@ jobs:
           bind - split-window -v
           EOF
 
-      - name: Set up gh-contributions
+      - name: Install termgraph
+        run: pip install termgraph
+
+      - name: Generate stats data
         run: |
-          chmod +x scripts/gh-contributions
-          sudo ln -sf "$(pwd)/scripts/gh-contributions" /usr/local/bin/gh-contributions
+          chmod +x scripts/generate-stats.sh
+          bash scripts/generate-stats.sh YousefHadder
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Generate profile GIF
         run: vhs profile.tape
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Upload GIF as artifact
         uses: actions/upload-artifact@v4
