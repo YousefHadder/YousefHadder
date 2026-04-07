@@ -44,7 +44,10 @@ jobs:
           fc-cache -fv
 
       - name: Configure tmux
-        run: cp config/tmux.conf ~/.tmux.conf
+        run: |
+          git clone --depth 1 --branch v2.1.3 https://github.com/catppuccin/tmux.git \
+            "$HOME/.config/tmux/plugins/catppuccin/tmux"
+          cp config/tmux.conf ~/.tmux.conf
 
       - name: Set up Neovim config
         run: |
