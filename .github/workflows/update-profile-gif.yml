@@ -60,7 +60,9 @@ jobs:
           curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
           mkdir -p ~/.config
           cp config/starship.toml ~/.config/starship.toml
+          # Ensure starship loads in every bash shell VHS spawns (incl. tmux panes)
           echo 'eval "$(starship init bash)"' >> ~/.bashrc
+          echo 'eval "$(starship init bash)"' >> ~/.bash_profile
 
       - name: Install termgraph
         run: pip install termgraph

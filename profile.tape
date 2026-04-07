@@ -28,13 +28,6 @@ Set Theme "Catppuccin Mocha"
 
 Sleep 500ms
 
-# Initialize starship prompt
-Hide
-Type "eval \"$(starship init bash)\""
-Enter
-Show
-Sleep 500ms
-
 # Start tmux with a named session
 Type "tmux new-session -s yousef"
 Enter
