@@ -10,7 +10,7 @@ Output profile.gif
 # -----------------------------------------------------------------------------
 # Terminal Settings (matching your setup)
 # -----------------------------------------------------------------------------
-Set Shell bash
+Set Shell "bash --login"
 Set FontFamily "JetBrainsMono Nerd Font"
 Set FontSize 12
 Set Width 1200

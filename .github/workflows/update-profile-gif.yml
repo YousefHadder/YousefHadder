@@ -50,6 +50,18 @@ jobs:
           bind - split-window -v
           EOF
 
+      - name: Set up Neovim config
+        run: |
+          mkdir -p ~/.config/nvim
+          cp config/init.lua ~/.config/nvim/init.lua
+
+      - name: Install and configure Starship prompt
+        run: |
+          curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
+          mkdir -p ~/.config
+          cp config/starship.toml ~/.config/starship.toml
+          echo 'eval "$(starship init bash)"' >> ~/.bashrc
+
       - name: Install termgraph
         run: pip install termgraph
 
