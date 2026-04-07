@@ -18,7 +18,22 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y neovim
+          sudo apt-get install -y neovim ffmpeg
+
+      - name: Install ttyd
+        run: |
+          curl -fsSL -o /tmp/ttyd https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64
+          chmod +x /tmp/ttyd
+          sudo mv /tmp/ttyd /usr/local/bin/ttyd
+          ttyd --version
+
+      - name: Install VHS
+        run: |
+          VHS_VERSION=$(curl -fsSL https://api.github.com/repos/charmbracelet/vhs/releases/latest | jq -r .tag_name | sed 's/^v//')
+          curl -fsSL "https://github.com/charmbracelet/vhs/releases/download/v${VHS_VERSION}/vhs_${VHS_VERSION}_Linux_x86_64.tar.gz" \
+            | tar -xz -C /tmp
+          sudo mv /tmp/vhs /usr/local/bin/vhs
+          vhs --version
 
       - name: Install JetBrainsMono Nerd Font
         run: |
@@ -41,9 +56,7 @@ jobs:
           sudo ln -sf "$(pwd)/scripts/gh-contributions" /usr/local/bin/gh-contributions
 
       - name: Generate profile GIF
-        uses: charmbracelet/vhs-action@v2
-        with:
-          path: profile.tape
+        run: vhs profile.tape
         env:
           GH_TOKEN: ${{ github.token }}
 
