@@ -45,12 +45,15 @@ jobs:
 
       - name: Configure tmux
         run: |
+          # Clone plugins to ~/.tmux/plugins (standard TPM layout)
+          mkdir -p "$HOME/.tmux/plugins"
           git clone --depth 1 --branch v2.1.3 https://github.com/catppuccin/tmux.git \
-            "$HOME/.config/tmux/plugins/catppuccin/tmux"
+            "$HOME/.tmux/plugins/tmux"
           git clone --depth 1 https://github.com/tmux-plugins/tmux-cpu.git \
-            "$HOME/.config/tmux/plugins/tmux-cpu"
-          mkdir -p "$HOME/.config/tmux/modules"
-          cp config/modules/*.conf "$HOME/.config/tmux/modules/"
+            "$HOME/.tmux/plugins/tmux-cpu"
+          # Copy custom modules
+          mkdir -p "$HOME/.tmux/modules"
+          cp config/modules/*.conf "$HOME/.tmux/modules/"
           cp config/tmux.conf ~/.tmux.conf
 
       - name: Set up Neovim config
