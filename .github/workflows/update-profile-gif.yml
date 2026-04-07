@@ -43,12 +43,8 @@ jobs:
           tar -xf /tmp/JetBrainsMono.tar.xz -C ~/.local/share/fonts
           fc-cache -fv
 
-      - name: Configure tmux keybindings
-        run: |
-          cat > ~/.tmux.conf << 'EOF'
-          bind | split-window -h
-          bind - split-window -v
-          EOF
+      - name: Configure tmux
+        run: cp config/tmux.conf ~/.tmux.conf
 
       - name: Set up Neovim config
         run: |

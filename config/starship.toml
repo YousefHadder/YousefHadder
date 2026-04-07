@@ -122,8 +122,7 @@ time_format = '%H:%M'
 disabled = false
 
 [username]
-format = '[─](fg:current_line)[](fg:yellow)[ ](fg:primary bg:yellow)[](fg:yellow bg:box)[ $user](fg:foreground bg:box)[](fg:box) '
-show_always = true
+disabled = true
 
 [character]
 format = """
