@@ -1,0 +1,55 @@
+name: Update Profile GIF
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday at midnight UTC
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  generate-gif:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y neovim
+
+      - name: Install JetBrainsMono Nerd Font
+        run: |
+          mkdir -p ~/.local/share/fonts
+          curl -fsSL -o /tmp/JetBrainsMono.tar.xz \
+            https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+          tar -xf /tmp/JetBrainsMono.tar.xz -C ~/.local/share/fonts
+          fc-cache -fv
+
+      - name: Configure tmux keybindings
+        run: |
+          cat > ~/.tmux.conf << 'EOF'
+          bind | split-window -h
+          bind - split-window -v
+          EOF
+
+      - name: Set up gh-contributions
+        run: |
+          chmod +x scripts/gh-contributions
+          sudo ln -sf "$(pwd)/scripts/gh-contributions" /usr/local/bin/gh-contributions
+
+      - name: Generate profile GIF
+        uses: charmbracelet/vhs-action@v2
+        with:
+          path: profile.tape
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Upload GIF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: profile-gif
+          path: profile.gif
+          retention-days: 30

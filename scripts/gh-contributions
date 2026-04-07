@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Custom gh-contributions script for CI
+# Based on jeppefrandsen/gh-contributions but uses user(login:) instead of
+# viewer so it works with GITHUB_TOKEN in GitHub Actions.
+set -e
+
+username="${1:-YousefHadder}"
+
+icon="▩"
+color_text=255
+colors=(247 188 225 182 219 176 213 170 207 164 201)
+weekdays=("Sun" "Mon" "Tue" "Wed" "Thu" "Fri" "Sat")
+months=("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
+contributions=($(gh api graphql --cache 24h --jq '..|.contributionCount?' -f query="{
+  user(login: \"$username\") {
+    contributionsCollection {
+      contributionCalendar {
+        weeks {
+          contributionDays {
+            contributionCount
+          }
+        }
+      }
+    }
+  }
+}"))
+
+tput init
+month_current=$(date +%-m)
+printf "    "
+
+for month in {0..11}; do
+  _month=$(( month+month_current ))
+  if (( _month > 12 )); then
+    _month=$(( _month-12 ))
+  fi
+  printf "%s${months[$_month-1]}      " "$(tput setaf $color_text)"
+done
+
+printf "\n"
+
+for day in {0..6}; do
+  printf "%s${weekdays[$day]} " "$(tput setaf $color_text)"
+  for week in {0..51}; do
+    _number="contributions[$day+$week*7]"
+    if (( "$_number" >= "${#colors[@]}" )); then
+      _number=${colors[${#colors[@]}]}
+    fi
+    printf "%s$icon " "$(tput setaf "${colors[_number]}")"
+  done
+  printf "\n"
+done
