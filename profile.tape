@@ -10,7 +10,7 @@ Output profile.gif
 # -----------------------------------------------------------------------------
 # Terminal Settings (matching your setup)
 # -----------------------------------------------------------------------------
-Set Shell "bash --login"
+Set Shell bash
 Set FontFamily "JetBrainsMono Nerd Font"
 Set FontSize 12
 Set Width 1200
@@ -26,6 +26,13 @@ Set Theme "Catppuccin Mocha"
 # Scene 1: Terminal Boot
 # -----------------------------------------------------------------------------
 
+Sleep 500ms
+
+# Initialize starship prompt
+Hide
+Type "eval \"$(starship init bash)\""
+Enter
+Show
 Sleep 500ms
 
 # Start tmux with a named session
