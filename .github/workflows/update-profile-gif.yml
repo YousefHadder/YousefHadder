@@ -54,8 +54,13 @@ jobs:
 
       - name: Set up Neovim config
         run: |
+          # Copy the CI nvim config (alpha dashboard + bebop theme + lualine)
           mkdir -p ~/.config/nvim
-          cp config/init.lua ~/.config/nvim/init.lua
+          cp -r config/nvim/* ~/.config/nvim/
+          # Pre-install lazy.nvim and plugins headlessly (no output in GIF)
+          nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
+          # Run a second time to ensure everything is settled
+          nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
 
       - name: Install and configure Starship prompt
         run: |

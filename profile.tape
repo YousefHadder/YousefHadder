@@ -91,10 +91,10 @@ Sleep 100ms
 Left
 Sleep 500ms
 
-# Open neovim
+# Open neovim (shows alpha dashboard with Palestine flag)
 Type "nvim"
 Enter
-Sleep 1500ms
+Sleep 3000ms
 
 # Edit about.rb
 Type ":e about.rb"
