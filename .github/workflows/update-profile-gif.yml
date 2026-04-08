@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # Manual trigger
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate-gif:
@@ -90,3 +90,13 @@ jobs:
           name: profile-gif
           path: profile.gif
           retention-days: 30
+
+      - name: Commit and push updated GIF
+        run: |
+          mkdir -p img
+          cp profile.gif img/profile.gif
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add img/profile.gif
+          git diff --cached --quiet && echo "No changes to commit" || \
+            (git commit -m "chore: update profile GIF [skip ci]" && git push)

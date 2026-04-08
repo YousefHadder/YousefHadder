@@ -1,4 +1,4 @@
-![profile](https://github.com/user-attachments/assets/7b1b36e2-aede-49fe-b1ad-c6358e1a3a8e)
+![profile](img/profile.gif)
 
 <div align="center">
 
