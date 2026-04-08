@@ -2,6 +2,10 @@
 # Fetch GitHub stats and generate termgraph data files
 set -euo pipefail
 
+# Disable pagers to prevent gh from piping through less
+export GH_PAGER=""
+export PAGER="cat"
+
 USERNAME="${1:-YousefHadder}"
 DATA_DIR="$(cd "$(dirname "$0")/.." && pwd)/data"
 mkdir -p "$DATA_DIR"
