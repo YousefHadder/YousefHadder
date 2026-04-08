@@ -60,7 +60,7 @@ Up
 Sleep 300ms
 
 Hide
-Type "clear && termgraph data/activity.dat --title 'YTD Activity' --color green --width 20 --format '{:.0f}' && sleep 9999"
+Type "clear && bash scripts/show-activity.sh && sleep 9999"
 Show
 Enter
 Sleep 1500ms
@@ -76,7 +76,7 @@ Down
 Sleep 300ms
 
 Hide
-Type "clear && termgraph data/languages.dat --title 'Top Languages (by commits)' --color cyan --width 20 --format '{:.0f}' --suffix ' commits' && sleep 9999"
+Type "clear && bash scripts/show-languages.sh && sleep 9999"
 Show
 Enter
 Sleep 1500ms

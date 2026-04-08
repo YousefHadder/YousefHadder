@@ -46,8 +46,7 @@ EOF
 
 echo "  Activity: $COMMITS commits, $PRS PRs, $REVIEWS reviews, $ISSUES issues"
 
-# --- Top languages by actual commits (last 12 months) ---
-YEAR_AGO=$(date -u -d "12 months ago" +%Y-%m-%dT00:00:00Z 2>/dev/null || date -u -v-12m +%Y-%m-%dT00:00:00Z)
+# --- Top languages by actual commits (YTD) ---
 LANGS=$(gh api graphql --jq "
   [.data.user.contributionsCollection.commitContributionsByRepository[] |
    select(.contributions.totalCount > 0) |
@@ -57,7 +56,7 @@ LANGS=$(gh api graphql --jq "
    \"\(.name),\(.count)\"
 " -f query="{
   user(login: \"$USERNAME\") {
-    contributionsCollection(from: \"${YEAR_AGO}\", to: \"${TODAY}\") {
+    contributionsCollection(from: \"${YEAR}-01-01T00:00:00Z\", to: \"${TODAY}\") {
       commitContributionsByRepository(maxRepositories: 100) {
         contributions { totalCount }
         repository {
