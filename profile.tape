@@ -76,7 +76,7 @@ Down
 Sleep 300ms
 
 Hide
-Type "clear && termgraph data/languages.dat --title 'Top Languages (by repos)' --color cyan --width 20 --format '{:.0f}' --suffix ' repos' && sleep 9999"
+Type "clear && termgraph data/languages.dat --title 'Top Languages (by commits)' --color cyan --width 20 --format '{:.0f}' --suffix ' commits' && sleep 9999"
 Show
 Enter
 Sleep 1500ms

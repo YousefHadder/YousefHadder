@@ -46,16 +46,23 @@ EOF
 
 echo "  Activity: $COMMITS commits, $PRS PRs, $REVIEWS reviews, $ISSUES issues"
 
-# --- Top languages across repos (including org) ---
-LANGS=$(gh api graphql --jq '
-  [.data.user.repositories.nodes[] | select(.primaryLanguage != null) | .primaryLanguage.name] |
-  group_by(.) | map({name: .[0], count: length}) | sort_by(-.count) | .[0:7][] |
-  "\(.name),\(.count)"
-' -f query="{
+# --- Top languages by actual commits (last 12 months) ---
+YEAR_AGO=$(date -u -d "12 months ago" +%Y-%m-%dT00:00:00Z 2>/dev/null || date -u -v-12m +%Y-%m-%dT00:00:00Z)
+LANGS=$(gh api graphql --jq "
+  [.data.user.contributionsCollection.commitContributionsByRepository[] |
+   select(.contributions.totalCount > 0) |
+   {lang: (.repository.primaryLanguage.name // \"Other\"), commits: .contributions.totalCount}] |
+   group_by(.lang) | map({name: .[0].lang, count: (map(.commits) | add)}) |
+   sort_by(-.count) | .[0:7][] |
+   \"\(.name),\(.count)\"
+" -f query="{
   user(login: \"$USERNAME\") {
-    repositories(first: 100, ownerAffiliations: [OWNER, ORGANIZATION_MEMBER]) {
-      nodes {
-        primaryLanguage { name }
+    contributionsCollection(from: \"${YEAR_AGO}\", to: \"${TODAY}\") {
+      commitContributionsByRepository(maxRepositories: 100) {
+        contributions { totalCount }
+        repository {
+          primaryLanguage { name }
+        }
       }
     }
   }
