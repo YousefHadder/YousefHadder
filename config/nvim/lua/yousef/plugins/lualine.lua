@@ -72,10 +72,8 @@ return {
 				lualine_x = {
 					{
 						show_macro_recording,
-						color = { fg = "#ffd700" }, -- Define color from slate.vim line 88
+						color = { fg = "#ffd700" },
 					},
-					{
-						function()
 					"encoding",
 					"fileformat",
 					"filetype"
