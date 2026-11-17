@@ -5,48 +5,108 @@ on:
     - cron: '0 0 * * 0' # Weekly on Sunday at midnight UTC
   workflow_dispatch: # Manual trigger
 
-permissions:
-  contents: write
+permissions: {}
+
+concurrency:
+  group: profile-gif
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
 
 jobs:
-  generate-gif:
-    runs-on: ubuntu-latest
+  collect-stats:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.stats.outputs.artifact-id }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Generate stats data
+        run: bash scripts/generate-stats.sh YousefHadder
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          # Private/internal aggregate counts and language totals are approved for publication.
+          PUBLISH_PRIVATE_AGGREGATES: 'true'
+
+      - name: Transfer aggregate data
+        id: stats
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: profile-stats
+          path: |
+            data/activity.dat
+            data/languages.dat
+          if-no-files-found: error
+          retention-days: 1
+
+  generate-gif:
+    needs: collect-stats
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.gif.outputs.artifact-id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download aggregate data
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.collect-stats.outputs.artifact-id }}
+          path: data
+          merge-multiple: true
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y neovim ffmpeg
+          sudo apt-get install -y --no-install-recommends neovim ffmpeg tmux fontconfig
 
       - name: Install ttyd
         run: |
-          curl -fsSL -o /tmp/ttyd https://github.com/tsl0922/ttyd/releases/latest/download/ttyd.x86_64
-          chmod +x /tmp/ttyd
-          sudo mv /tmp/ttyd /usr/local/bin/ttyd
+          curl -fsSL -o /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64
+          echo '8a217c968aba172e0dbf3f34447218dc015bc4d5e59bf51db2f2cd12b7be4f55  /tmp/ttyd' | sha256sum --check
+          sudo install -m 755 /tmp/ttyd /usr/local/bin/ttyd
           ttyd --version
 
       - name: Install VHS
         run: |
-          VHS_VERSION=$(curl -fsSL https://api.github.com/repos/charmbracelet/vhs/releases/latest | jq -r .tag_name | sed 's/^v//')
-          curl -fsSL "https://github.com/charmbracelet/vhs/releases/download/v${VHS_VERSION}/vhs_${VHS_VERSION}_Linux_x86_64.tar.gz" \
-            | tar -xz -C /tmp
-          sudo mv "/tmp/vhs_${VHS_VERSION}_Linux_x86_64/vhs" /usr/local/bin/vhs
+          curl -fsSL -o /tmp/vhs.tar.gz \
+            https://github.com/charmbracelet/vhs/releases/download/v0.12.1/vhs_0.12.1_Linux_x86_64.tar.gz
+          echo 'eb33787a5b1cebf91fe0b18bd231e2d71d36c1ff4babd99ddac1a6ab411efd10  /tmp/vhs.tar.gz' | sha256sum --check
+          mkdir -p /tmp/vhs
+          tar -xzf /tmp/vhs.tar.gz -C /tmp/vhs --strip-components=1
+          sudo install -m 755 /tmp/vhs/vhs /usr/local/bin/vhs
           vhs --version
 
       - name: Install JetBrainsMono Nerd Font
         run: |
           mkdir -p ~/.local/share/fonts
           curl -fsSL -o /tmp/JetBrainsMono.tar.xz \
-            https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+            https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz
+          echo '04d5e8f903693f9dd13e16f867e994834e681eb3c72c0d337a770dcda09010cf  /tmp/JetBrainsMono.tar.xz' | sha256sum --check
           tar -xf /tmp/JetBrainsMono.tar.xz -C ~/.local/share/fonts
           fc-cache -fv
 
       - name: Configure tmux
         run: |
-          git clone --depth 1 --branch v2.1.3 https://github.com/catppuccin/tmux.git \
-            "$HOME/.tmux/plugins/tmux"
+          plugin="$HOME/.tmux/plugins/tmux"
+          git init "$plugin"
+          git -C "$plugin" remote add origin https://github.com/catppuccin/tmux.git
+          git -C "$plugin" fetch --depth 1 origin b2f219c00609ea1772bcfbdae0697807184743e4
+          git -C "$plugin" checkout --detach b2f219c00609ea1772bcfbdae0697807184743e4
           mkdir -p "$HOME/scripts"
           cp scripts/cpu.sh scripts/ram.sh "$HOME/scripts/"
           chmod +x "$HOME/scripts/cpu.sh" "$HOME/scripts/ram.sh"
@@ -57,46 +117,95 @@ jobs:
           # Copy the CI nvim config (alpha dashboard + bebop theme + lualine)
           mkdir -p ~/.config/nvim
           cp -r config/nvim/* ~/.config/nvim/
-          # Pre-install lazy.nvim and plugins headlessly (no output in GIF)
-          nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
-          # Run a second time to ensure everything is settled
-          nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
+          nvim --headless "+Lazy! sync" \
+            "+lua if vim.v.errmsg ~= '' then vim.cmd.cquit(1) end; for name, plugin in pairs(require('lazy.core.config').plugins) do for _, task in ipairs(plugin._.tasks or {}) do if task:has_errors() then vim.api.nvim_err_writeln('Plugin setup failed: ' .. name); vim.cmd.cquit(1) end end end" \
+            +qa
 
       - name: Install and configure Starship prompt
         run: |
-          curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
+          curl -fsSL -o /tmp/starship.tar.gz \
+            https://github.com/starship/starship/releases/download/v1.27.0/starship-x86_64-unknown-linux-musl.tar.gz
+          echo '10c8eb4cb3b761d9bf59ea828444c2dab36c900b7d69a69e08814b286969df89  /tmp/starship.tar.gz' | sha256sum --check
+          mkdir -p /tmp/starship
+          tar -xzf /tmp/starship.tar.gz -C /tmp/starship
+          sudo install -m 755 /tmp/starship/starship /usr/local/bin/starship
           mkdir -p ~/.config
           cp config/starship.toml ~/.config/starship.toml
           # Ensure starship loads in every bash shell VHS spawns (incl. tmux panes)
-          echo 'eval "$(starship init bash)"' >> ~/.bashrc
-          echo 'eval "$(starship init bash)"' >> ~/.bash_profile
+          tee -a ~/.bashrc ~/.bash_profile >/dev/null <<'EOF'
+          eval "$(starship init bash)"
+          EOF
 
       - name: Install termgraph
-        run: pip install termgraph
-
-      - name: Generate stats data
         run: |
-          chmod +x scripts/generate-stats.sh
-          bash scripts/generate-stats.sh YousefHadder
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          python3 -m venv "$RUNNER_TEMP/termgraph"
+          "$RUNNER_TEMP/termgraph/bin/pip" install --require-hashes --only-binary=:all: -r config/requirements.txt
+          echo "$RUNNER_TEMP/termgraph/bin" >> "$GITHUB_PATH"
 
       - name: Generate profile GIF
         run: vhs profile.tape
 
       - name: Upload GIF as artifact
-        uses: actions/upload-artifact@v4
+        id: gif
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: profile-gif
           path: profile.gif
+          if-no-files-found: error
           retention-days: 30
+
+  publish-gif:
+    needs: generate-gif
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout current default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Download rendered GIF
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.generate-gif.outputs.artifact-id }}
+          path: ${{ runner.temp }}/profile-gif
+          merge-multiple: true
+
+      # Treat renderer output as data; never execute files supplied by that job.
+      - name: Validate and copy GIF
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import shutil
+
+          source = Path(os.environ["RUNNER_TEMP"]) / "profile-gif/profile.gif"
+          if source.is_symlink() or not source.is_file():
+              raise SystemExit("Expected a regular profile.gif file")
+          if not 6 < source.stat().st_size <= 100 * 1024 * 1024:
+              raise SystemExit("GIF is empty or exceeds 100 MiB")
+          with source.open("rb") as stream:
+              if stream.read(6) not in (b"GIF87a", b"GIF89a"):
+                  raise SystemExit("Invalid GIF signature")
+          Path("img").mkdir(exist_ok=True)
+          shutil.copyfile(source, "img/profile.gif")
+          PY
 
       - name: Commit and push updated GIF
         run: |
-          mkdir -p img
-          cp profile.gif img/profile.gif
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add img/profile.gif
-          git diff --cached --quiet && echo "No changes to commit" || \
-            (git commit -m "chore: update profile GIF [skip ci]" && git push)
+          git add -- img/profile.gif
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: update profile GIF [skip ci]"
+          gh auth setup-git --hostname github.com
+          git push origin "HEAD:$DEFAULT_BRANCH"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}

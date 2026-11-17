@@ -6,6 +6,16 @@ set -euo pipefail
 export GH_PAGER=""
 export PAGER="cat"
 
+if [[ "${PUBLISH_PRIVATE_AGGREGATES:-false}" != "true" ]]; then
+  echo "Set PUBLISH_PRIVATE_AGGREGATES=true to approve publishing private/internal contribution aggregates." >&2
+  exit 1
+fi
+
+if [[ -z "${GH_TOKEN:-}" ]]; then
+  echo "GH_TOKEN is required to fetch contribution statistics." >&2
+  exit 1
+fi
+
 USERNAME="${1:-YousefHadder}"
 DATA_DIR="$(cd "$(dirname "$0")/.." && pwd)/data"
 mkdir -p "$DATA_DIR"

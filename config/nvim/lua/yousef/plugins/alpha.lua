@@ -1,5 +1,6 @@
 return {
 	"goolord/alpha-nvim",
+	commit = "4ba26e41990c11620c96c0e1cff20eab65efde4a",
 	event = "VimEnter",
 	enabled = true,
 	init = false,
