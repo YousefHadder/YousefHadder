@@ -1,0 +1,2 @@
+termgraph==0.8.1 --hash=sha256:2facbf2f54a833a4b4f7f458da0880aa01e3da52a557de6fbb3f76d392bdb9f4
+colorama==0.4.6 --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
